@@ -65,6 +65,10 @@ class TaskController extends Controller
 
     public function atualiza(Request $request, Task $task)
     {
+        if (!auth()->user()->is_admin && $task->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Você não tem permissão para editar esta tarefa.'], 403);
+        }
+
         $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -100,11 +104,19 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
+        if (!auth()->user()->is_admin && $task->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Você não tem permissão para editar esta tarefa.'], 403);
+        }
+
         return response()->json($task);
     }
 
     public function destroy(Task $task)
     {
+        if (!auth()->user()->is_admin && $task->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Você não tem permissão para excluir esta tarefa.'], 403);
+        }
+
         $task->delete();
 
         return response()->json(['success' => 'Tarefa excluída com sucesso!']);
