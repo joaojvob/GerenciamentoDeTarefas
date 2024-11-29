@@ -87,13 +87,11 @@
             });
 
             $('#createTaskButton').on('click', function() {
-                // Limpa os campos do formulário antes de abrir o modal
                 $('#createTaskForm')[0].reset();
                 $('#createTaskModal').toggleClass('hidden');
             });
 
             $('#cancelCreateTask').on('click', function() {
-                // Limpa os campos do formulário antes de fechar o modal
                 $('#createTaskForm')[0].reset();
                 $('#createTaskModal').toggleClass('hidden');
             });
@@ -110,7 +108,7 @@
                         alert('Tarefa criada com sucesso!');
                         $('#createTaskModal').addClass('hidden');
                         table.ajax.reload();
-                        $('#createTaskForm')[0].reset(); // Limpa os campos após a criação
+                        $('#createTaskForm')[0].reset();
                     },
                     error: function(response) {
                         if (response.responseJSON && response.responseJSON.error) {

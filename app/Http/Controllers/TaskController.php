@@ -48,7 +48,6 @@ class TaskController extends Controller
             })
             ->first();
 
-
         if ($existingTask) {
             return response()->json(['error' => 'Já existe uma tarefa para este dia e horário.'], 422);
         }
