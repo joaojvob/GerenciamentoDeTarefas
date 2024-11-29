@@ -9,12 +9,10 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <!-- Botão para abrir o modal de criação -->
                     <button class="bg-blue-500 text-white py-2 px-4 rounded mb-4" id="createTaskButton">
                         Create Task
                     </button>
 
-                    <!-- DataTables -->
                     <table id="tasksTable" class="table-auto w-full">
                         <thead>
                             <tr>
@@ -23,7 +21,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Data will be loaded by DataTables -->
                         </tbody>
                     </table>
                 </div>
@@ -36,12 +33,23 @@
 
     <script>
         $(document).ready(function() {
-            // Configuração do DataTables
-
             const table = $('#tasksTable').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('dashboard') }}',
+                ajax: {
+                    url: '{{ route('tasks.data') }}',
+                    type: 'GET',
+                    data: function(d) {
+                        d.search = '';
+                    },
+                    dataSrc: function(json) {
+                        console.log(json);
+
+                        var data = json.data;
+
+                        return data;
+                    }
+                },
                 columns: [{
                         data: 'title',
                         name: 'title'
@@ -52,14 +60,10 @@
                         orderable: false,
                         searchable: false,
                         render: function(data, type, row) {
-                            return `
-                                    <a href="/tasks/${row.id}" class="btn btn-sm btn-info">View</a>
-                                    <a href="/tasks/${row.id}/edit" class="btn btn-sm btn-warning">Edit</a>
-                                    <button class="btn btn-sm btn-danger delete-task" data-id="${row.id}">Delete</button>
-                                `;
+                            return data;
                         }
-                    },
-                ],
+                    }
+                ]
             });
 
             $('#createTaskButton').on('click', function() {
@@ -72,7 +76,7 @@
 
             $('#createTaskForm').on('submit', function(e) {
                 e.preventDefault();
-                const taskData = $(this).serialize(); // Captura todos os dados do formulário
+                const taskData = $(this).serialize();
 
                 $.ajax({
                     url: '{{ route('tasks.store') }}',

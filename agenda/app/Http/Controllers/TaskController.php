@@ -15,17 +15,19 @@ class TaskController extends Controller
 
     public function data(Request $request)
     {
-        $tasks = Task::query(); // Você pode adicionar filtros aqui, se necessário
+        // Buscar as tarefas apenas do usuário logado
+        $tasks = Task::query()->where('user_id', auth()->id())->get();
 
-        return datatables()->of($tasks) // Usando o pacote Laravel Datatables
+        return datatables()->of($tasks)
             ->addColumn('actions', function ($task) {
-                return '<a href="/tasks/' . $task->id . '" class="btn btn-sm btn-info">View</a>
-                    <a href="/tasks/' . $task->id . '/edit" class="btn btn-sm btn-warning">Edit</a>
-                    <button class="btn btn-sm btn-danger delete-task" data-id="' . $task->id . '">Delete</button>';
+                return '
+                <a href="/tasks/' . $task->id . '" class="btn btn-sm btn-info">View</a>
+                <a href="/tasks/' . $task->id . '/edit" class="btn btn-sm btn-warning">Edit</a>
+                <button class="btn btn-sm btn-danger delete-task" data-id="' . $task->id . '">Delete</button>
+            ';
             })
             ->make(true);
     }
-
 
     // Exibir formulário de criação
     public function create()
