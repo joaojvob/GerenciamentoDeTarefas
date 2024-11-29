@@ -7,7 +7,6 @@ use App\Models\Task;
 
 class TaskController extends Controller
 {
-    // Listar tarefas
     public function dataTable()
     {
         return view('dashboard');
@@ -15,28 +14,44 @@ class TaskController extends Controller
 
     public function data(Request $request)
     {
-        // Buscar as tarefas apenas do usuário logado
-        $tasks = Task::where('user_id', auth()->id())->get();
+        if (auth()->user()->is_admin) {
+            $tasks = Task::all();
+        } else {
+            $tasks = Task::where('user_id', auth()->id())->get();
+        }
 
         return datatables()->of($tasks)->make(true);
     }
 
-    // Exibir formulário de criação
     public function create()
     {
-        dd(2);
         return view('tasks.create');
     }
 
-    // Armazenar tarefa
     public function store(Request $request)
     {
         $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
-            'start_time'  => 'nullable|date',
-            'end_time'    => 'nullable|date',
+            'start_time'  => 'nullable|date_format:Y-m-d\TH:i',
+            'end_time'    => 'nullable|date_format:Y-m-d\TH:i',
         ]);
+
+        $existingTask = Task::where('user_id', auth()->id())
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('start_time', [$request->start_time, $request->end_time])
+                    ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('start_time', '<=', $request->start_time)
+                            ->where('end_time', '>=', $request->end_time);
+                    });
+            })
+            ->first();
+
+
+        if ($existingTask) {
+            return response()->json(['error' => 'Já existe uma tarefa para este dia e horário.'], 422);
+        }
 
         Task::create([
             'user_id'     => auth()->id(),
@@ -46,26 +61,33 @@ class TaskController extends Controller
             'end_time'    => $request->end_time,
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Task added successfully!');
-    }
-    // Exibir formulário de edição
-    public function edit(Task $task)
-    {
-        $this->authorize('update', $task);
-        return response()->json($task);
+        return redirect()->route('dashboard')->with('success', 'Tarefa criada com sucesso!');
     }
 
-    // Atualizar tarefa
-    public function update(Request $request, Task $task)
+    public function atualiza(Request $request, Task $task)
     {
-        $this->authorize('update', $task);
-
         $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
-            'start_time'  => 'nullable|date',
-            'end_time'    => 'nullable|date',
+            'start_time'  => 'nullable|date_format:Y-m-d\TH:i',
+            'end_time'    => 'nullable|date_format:Y-m-d\TH:i',
         ]);
+
+        $existingTask = Task::where('user_id', auth()->id())
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('start_time', [$request->start_time, $request->end_time])
+                    ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
+                    ->orWhere(function ($query) use ($request) {
+                        $query->where('start_time', '<=', $request->start_time)
+                            ->where('end_time', '>=', $request->end_time);
+                    });
+            })
+            ->where('id', '!=', $task->id)
+            ->first();
+
+        if ($existingTask) {
+            return response()->json(['error' => 'Já existe uma tarefa para este dia e horário.'], 422);
+        }
 
         $task->update([
             'title'       => $request->title,
@@ -74,14 +96,18 @@ class TaskController extends Controller
             'end_time'    => $request->end_time,
         ]);
 
-        return response()->json(['success' => 'Task updated successfully!']);
+        return response()->json(['success' => 'Tarefa atualizada com sucesso!']);
     }
 
-    // Excluir tarefa
+    public function edit(Task $task)
+    {
+        return response()->json($task);
+    }
+
     public function destroy(Task $task)
     {
         $task->delete();
 
-        return response()->json(['success' => 'Task deleted successfully!']);
+        return response()->json(['success' => 'Tarefa excluída com sucesso!']);
     }
 }

@@ -1,0 +1,63 @@
+button {
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+#createTaskButton {
+    background: linear-gradient(to right, #4caf50, #81c784);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#createTaskButton:hover {
+    background: linear-gradient(to right, #81c784, #4caf50);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.edit-task {
+    background: linear-gradient(to right, #3b82f6, #60a5fa);
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 8px;
+    margin-right: 5px;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.edit-task:hover {
+    background: linear-gradient(to right, #60a5fa, #3b82f6);
+    box-shadow: 0 5px 7px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.delete-task {
+    background: linear-gradient(to right, #f44336, #e57373);
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 8px;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.delete-task:hover {
+    background: linear-gradient(to right, #e57373, #f44336);
+    box-shadow: 0 5px 7px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+button:focus {
+    outline: 2px solid #00000033;
+    outline-offset: 2px;
+}
+
+button:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: none;
+}

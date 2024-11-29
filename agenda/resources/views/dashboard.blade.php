@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Tasks') }}
+            {{ __('Suas tarefas') }}
         </h2>
     </x-slot>
 
@@ -33,6 +33,7 @@
 
     <!-- Modal -->
     @include('tasks.create', ['ajax' => true])
+    @include('tasks.edit', ['ajax' => true])
 
     <script>
         $(document).ready(function() {
@@ -47,9 +48,7 @@
                     },
                     dataSrc: function(json) {
                         console.log(json);
-
                         var data = json.data;
-
                         return data;
                     }
                 },
@@ -70,28 +69,32 @@
                         name: 'end_time'
                     },
                     {
-                        data: null, // Não há campo específico no banco para esta coluna
-                        orderable: false, // Impede ordenação nesta coluna
-                        searchable: false, // Impede busca nesta coluna
+                        data: null,
+                        orderable: false,
+                        searchable: false,
                         render: function(data, type, row) {
                             return `
-                <button class="bg-green-500 text-white px-2 py-1 rounded edit-task" data-id="${row.id}">
-                    Editar
-                </button>
-                <button class="bg-red-500 text-white px-2 py-1 rounded delete-task" data-id="${row.id}">
-                    Excluir
-                </button>
-            `;
+                    <button class="bg-green-500 text-white px-2 py-1 rounded edit-task" data-id="${row.id}">
+                        Editar
+                    </button>
+                    <button class="bg-red-500 text-white px-2 py-1 rounded delete-task" data-id="${row.id}">
+                        Excluir
+                    </button>
+                `;
                         }
                     }
                 ]
             });
 
             $('#createTaskButton').on('click', function() {
+                // Limpa os campos do formulário antes de abrir o modal
+                $('#createTaskForm')[0].reset();
                 $('#createTaskModal').toggleClass('hidden');
             });
 
             $('#cancelCreateTask').on('click', function() {
+                // Limpa os campos do formulário antes de fechar o modal
+                $('#createTaskForm')[0].reset();
                 $('#createTaskModal').toggleClass('hidden');
             });
 
@@ -104,13 +107,17 @@
                     type: 'POST',
                     data: taskData,
                     success: function(response) {
-                        alert('Task created successfully!');
+                        alert('Tarefa criada com sucesso!');
                         $('#createTaskModal').addClass('hidden');
                         table.ajax.reload();
-                        $('#createTaskForm')[0].reset();
+                        $('#createTaskForm')[0].reset(); // Limpa os campos após a criação
                     },
                     error: function(response) {
-                        alert('Error creating task!');
+                        if (response.responseJSON && response.responseJSON.error) {
+                            alert(response.responseJSON.error);
+                        } else {
+                            alert('Erro ao criar a tarefa!');
+                        }
                     }
                 });
             });
@@ -118,30 +125,54 @@
             $(document).on('click', '.edit-task', function() {
                 const taskId = $(this).data('id');
 
-                // Faça uma requisição para obter os detalhes da tarefa
                 $.ajax({
                     url: `/tasks/${taskId}/edit`,
                     type: 'GET',
                     success: function(task) {
-                        // Preencha os dados no formulário do modal
                         $('#editTaskModal #title').val(task.title);
                         $('#editTaskModal #description').val(task.description);
                         $('#editTaskModal #start_time').val(task.start_time);
                         $('#editTaskModal #end_time').val(task.end_time);
-
-                        // Exiba o modal de edição
                         $('#editTaskModal').removeClass('hidden');
                     },
                     error: function(response) {
-                        alert('Error fetching task details!');
+                        alert('Erro ao buscar os detalhes da tarefa!');
                     }
+                });
+
+                $('#editTaskForm').off('submit').on('submit', function(e) {
+                    e.preventDefault();
+                    const taskData = $(this).serialize();
+
+                    $.ajax({
+                        url: `/tasks/${taskId}/atualiza`,
+                        type: 'PATCH',
+                        data: taskData,
+                        success: function(response) {
+                            alert('Tarefa atualizada com sucesso!');
+                            $('#editTaskModal').addClass('hidden');
+                            table.ajax.reload();
+                            $('#editTaskForm')[0].reset();
+                        },
+                        error: function(response) {
+                            if (response.responseJSON && response.responseJSON.error) {
+                                alert(response.responseJSON.error);
+                            } else {
+                                alert('Erro ao atualizar a tarefa!');
+                            }
+                        }
+                    });
+
                 });
             });
 
+            $('#cancelEditTask').on('click', function() {
+                $('#editTaskModal').toggleClass('hidden');
+            });
 
             $(document).on('click', '.delete-task', function() {
                 const taskId = $(this).data('id');
-                if (confirm('Are you sure you want to delete this task?')) {
+                if (confirm('Tem certeza de que deseja excluir esta tarefa?')) {
                     $.ajax({
                         url: `/tasks/${taskId}`,
                         type: 'DELETE',
@@ -149,11 +180,11 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            alert('Task deleted successfully!');
+                            alert('Tarefa excluída com sucesso!');
                             table.ajax.reload();
                         },
                         error: function(response) {
-                            alert('Error deleting task!');
+                            alert('Erro ao excluir a tarefa!');
                         }
                     });
                 }
@@ -161,4 +192,5 @@
 
         });
     </script>
+
 </x-app-layout>
