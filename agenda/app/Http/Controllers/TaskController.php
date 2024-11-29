@@ -16,22 +16,15 @@ class TaskController extends Controller
     public function data(Request $request)
     {
         // Buscar as tarefas apenas do usuário logado
-        $tasks = Task::query()->where('user_id', auth()->id())->get();
+        $tasks = Task::where('user_id', auth()->id())->get();
 
-        return datatables()->of($tasks)
-            ->addColumn('actions', function ($task) {
-                return '
-                <a href="/tasks/' . $task->id . '" class="btn btn-sm btn-info">View</a>
-                <a href="/tasks/' . $task->id . '/edit" class="btn btn-sm btn-warning">Edit</a>
-                <button class="btn btn-sm btn-danger delete-task" data-id="' . $task->id . '">Delete</button>
-            ';
-            })
-            ->make(true);
+        return datatables()->of($tasks)->make(true);
     }
 
     // Exibir formulário de criação
     public function create()
     {
+        dd(2);
         return view('tasks.create');
     }
 
@@ -55,19 +48,11 @@ class TaskController extends Controller
 
         return redirect()->route('dashboard')->with('success', 'Task added successfully!');
     }
-
-    // Exibir tarefa
-    public function show(Task $task)
-    {
-        $this->authorize('view', $task);
-        return view('tasks.show', compact('task'));
-    }
-
     // Exibir formulário de edição
     public function edit(Task $task)
     {
         $this->authorize('update', $task);
-        return view('tasks.edit', compact('task'));
+        return response()->json($task);
     }
 
     // Atualizar tarefa
@@ -89,13 +74,12 @@ class TaskController extends Controller
             'end_time'    => $request->end_time,
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Task updated successfully!');
+        return response()->json(['success' => 'Task updated successfully!']);
     }
 
     // Excluir tarefa
     public function destroy(Task $task)
     {
-        $this->authorize('delete', $task);
         $task->delete();
 
         return response()->json(['success' => 'Task deleted successfully!']);

@@ -10,14 +10,17 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <button class="bg-blue-500 text-white py-2 px-4 rounded mb-4" id="createTaskButton">
-                        Create Task
+                        Cria Tarefa
                     </button>
 
                     <table id="tasksTable" class="table-auto w-full">
                         <thead>
                             <tr>
-                                <th>Task Name</th>
-                                <th>Actions</th>
+                                <th>Título</th>
+                                <th>Descrição</th>
+                                <th>Inicio</th>
+                                <th>Fim</th>
+                                <th> </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -55,12 +58,30 @@
                         name: 'title'
                     },
                     {
-                        data: 'actions',
-                        name: 'actions',
-                        orderable: false,
-                        searchable: false,
+                        data: 'description',
+                        name: 'description'
+                    },
+                    {
+                        data: 'start_time',
+                        name: 'start_time'
+                    },
+                    {
+                        data: 'end_time',
+                        name: 'end_time'
+                    },
+                    {
+                        data: null, // Não há campo específico no banco para esta coluna
+                        orderable: false, // Impede ordenação nesta coluna
+                        searchable: false, // Impede busca nesta coluna
                         render: function(data, type, row) {
-                            return data;
+                            return `
+                <button class="bg-green-500 text-white px-2 py-1 rounded edit-task" data-id="${row.id}">
+                    Editar
+                </button>
+                <button class="bg-red-500 text-white px-2 py-1 rounded delete-task" data-id="${row.id}">
+                    Excluir
+                </button>
+            `;
                         }
                     }
                 ]
@@ -94,6 +115,30 @@
                 });
             });
 
+            $(document).on('click', '.edit-task', function() {
+                const taskId = $(this).data('id');
+
+                // Faça uma requisição para obter os detalhes da tarefa
+                $.ajax({
+                    url: `/tasks/${taskId}/edit`,
+                    type: 'GET',
+                    success: function(task) {
+                        // Preencha os dados no formulário do modal
+                        $('#editTaskModal #title').val(task.title);
+                        $('#editTaskModal #description').val(task.description);
+                        $('#editTaskModal #start_time').val(task.start_time);
+                        $('#editTaskModal #end_time').val(task.end_time);
+
+                        // Exiba o modal de edição
+                        $('#editTaskModal').removeClass('hidden');
+                    },
+                    error: function(response) {
+                        alert('Error fetching task details!');
+                    }
+                });
+            });
+
+
             $(document).on('click', '.delete-task', function() {
                 const taskId = $(this).data('id');
                 if (confirm('Are you sure you want to delete this task?')) {
@@ -113,6 +158,7 @@
                     });
                 }
             });
+
         });
     </script>
 </x-app-layout>
