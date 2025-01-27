@@ -157,9 +157,5 @@ As modificações no projeto foram versionadas utilizando o **Git** e publicadas
 
 ## Contribuição
 Contribuições são bem-vindas! Siga as diretrizes do projeto e abra um Pull Request com sua sugestão ou correção.
-
----
-
-## Licença
-Este projeto está licenciado sob a [MIT License](LICENSE).
+ 
 
