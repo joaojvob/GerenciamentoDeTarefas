@@ -1,66 +1,165 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Agenda Laravel - Documentação
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Sobre o Projeto
+Este é um projeto de uma Agenda desenvolvida utilizando **PHP** e **MySQL** em conjunto com o **Framework Laravel**. O objetivo principal é demonstrar habilidades em padrões de desenvolvimento como **Orientação a Objetos (OO)** e **MVC** (Model-View-Controller), além de criar interfaces intuitivas e funcionais com **Blade Templates**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Funcionalidades
+- **Sistema Multiusuário**:
+  - Tela de login com autenticação segura.
+  - Cadastro de usuários.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Gerenciamento de Tarefas**:
+  - Cadastro de tarefas associado a usuários.
+  - Validação de conflitos: é proibido cadastrar tarefas no mesmo dia e horário para o mesmo usuário.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Interface Intuitiva**:
+  - Layout responsivo utilizando **Bootstrap** (ou outra biblioteca de sua escolha).
+  - Exibição organizada das tarefas agendadas por usuário.
 
-## Learning Laravel
+- **APIs e Rotas**:
+  - Nomenclatura intuitiva para rotas, facilitando identificação e manutenção.
+  - Possibilidade de uso de **Javascript**, **jQuery** e **Ajax** para interatividade.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Tecnologias Utilizadas
+- **Backend**:
+  - PHP 8+
+  - Laravel 10
+- **Frontend**:
+  - Blade Templates
+  - Bootstrap / TailwindCSS (ou outra biblioteca CSS de preferência)
+  - Javascript / jQuery (opcional)
+- **Banco de Dados**:
+  - MySQL
+- **Versionamento de Código**:
+  - Git e GitHub
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Configuração do Ambiente
+### Requisitos
+1. PHP 8+
+2. Composer
+3. MySQL 5.7+
+4. Node.js (opcional para compilação de assets)
+5. Git
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Passos para Configuração
+1. Clone este repositório:
+   ```bash
+   git clone https://github.com/seu-usuario/agenda-laravel.git
+   ```
 
-### Premium Partners
+2. Acesse o diretório do projeto:
+   ```bash
+   cd agenda-laravel
+   ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+3. Instale as dependências do Laravel:
+   ```bash
+   composer install
+   ```
 
-## Contributing
+4. Configure o arquivo `.env`:
+   - Renomeie o arquivo `.env.example` para `.env`.
+   - Atualize as credenciais do banco de dados:
+     ```env
+     DB_CONNECTION=mysql
+     DB_HOST=127.0.0.1
+     DB_PORT=3306
+     DB_DATABASE=agenda
+     DB_USERNAME=seu-usuario
+     DB_PASSWORD=sua-senha
+     ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+5. Gere a chave da aplicação:
+   ```bash
+   php artisan key:generate
+   ```
 
-## Code of Conduct
+6. Execute as migrações para criar as tabelas no banco de dados:
+   ```bash
+   php artisan migrate
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+7. Inicie o servidor local:
+   ```bash
+   php artisan serve
+   ```
+   A aplicação estará disponível em [http://localhost:8000](http://localhost:8000).
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Estrutura de Banco de Dados
+Segue o diagrama de entidades e relacionamentos utilizado no projeto:
 
-## License
+- **Usuários** (`users`)
+  - `id`: Identificador único (PK)
+  - `name`: Nome do usuário
+  - `email`: Endereço de e-mail (unique)
+  - `password`: Senha criptografada
+  - `created_at`, `updated_at`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- **Tarefas** (`tasks`)
+  - `id`: Identificador único (PK)
+  - `user_id`: Relacionamento com o usuário (FK)
+  - `title`: Título da tarefa
+  - `description`: Descrição detalhada
+  - `date`: Data da tarefa
+  - `time`: Horário da tarefa
+  - `created_at`, `updated_at`
+
+---
+
+## Uso do Sistema
+### Acesso ao Sistema
+1. Realize o cadastro de um usuário na página de **Registro**.
+2. Utilize suas credenciais para acessar o sistema.
+
+### Gerenciamento de Tarefas
+1. Acesse a página de **Tarefas** no menu principal.
+2. Cadastre uma nova tarefa, informando:
+   - Título
+   - Descrição
+   - Data e Hora
+3. Confira a lista de tarefas agendadas na tela principal.
+4. Utilize as opções de edição e exclusão conforme necessário.
+
+### Validações
+- Tarefas com data e hora conflitantes para o mesmo usuário não serão permitidas.
+
+---
+
+## Versionamento
+As modificações no projeto foram versionadas utilizando o **Git** e publicadas no **GitHub**. Utilize os seguintes comandos para contribuir:
+
+1. Crie um novo branch para sua funcionalidade ou correção:
+   ```bash
+   git checkout -b minha-nova-feature
+   ```
+
+2. Realize os commits das alterações:
+   ```bash
+   git commit -m "Adiciona nova funcionalidade"
+   ```
+
+3. Envie suas alterações para o repositório remoto:
+   ```bash
+   git push origin minha-nova-feature
+   ```
+
+4. Crie um **Pull Request** no GitHub para revisão.
+
+---
+
+## Contribuição
+Contribuições são bem-vindas! Siga as diretrizes do projeto e abra um Pull Request com sua sugestão ou correção.
+
+---
+
+## Licença
+Este projeto está licenciado sob a [MIT License](LICENSE).
+
