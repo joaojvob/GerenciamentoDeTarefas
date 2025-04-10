@@ -30,7 +30,7 @@
         <div>
             <x-input-label for="is_admin" :value="__('É Admin?')" />
             <input id="is_admin" name="is_admin" type="checkbox" class="mt-1 block"
-                :checked="old('is_admin', $user - > is_admin) ? 'checked' : ''" />
+                :checked="old('is_admin', $user->is_admin) ? 'checked' : ''" />
             <x-input-error class="mt-2" :messages="$errors->get('is_admin')" />
         </div>
 
