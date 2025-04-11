@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TarefaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,10 +17,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::patch('/tasks/{task}/atualiza', [TaskController::class, 'atualiza'])->name('tasks.atualiza');
-    Route::any('/tasks/data', [TaskController::class, 'data'])->name('tasks.data');
+    Route::patch('/tarefas/{tarefa}/atualiza', [TarefaController::class, 'atualiza'])->name('tarefas.atualiza');
+    Route::any('/tarefas/data', [TarefaController::class, 'data'])->name('tarefas.data');
+    Route::get('/tarefas/relatorio', [TarefaController::class, 'relatorio']);
 
-    Route::resource('tasks', TaskController::class);
+    Route::resource('tarefas', TarefaController::class);
 });
 
 require __DIR__ . '/auth.php';

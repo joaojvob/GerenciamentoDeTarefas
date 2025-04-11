@@ -9,15 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('tasks', function (Blueprint $table) {
+        Schema::create('tarefas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->dateTime('start_time');
-            $table->dateTime('end_time');
+            $table->string('titulo');
+            $table->text('descricao')->nullable();
+            $table->enum('prioridade', ['baixa', 'media', 'alta'])->default('media');
+            $table->enum('status', ['pendente', 'em_andamento', 'concluida', 'cancelada'])->default('pendente');
+            $table->dateTime('data_vencimento')->nullable();
+            $table->integer('ordem')->default(0);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tasks');
+        Schema::dropIfExists('tarefas');
     }
 };

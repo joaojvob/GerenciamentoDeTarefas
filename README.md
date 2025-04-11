@@ -103,7 +103,7 @@ Segue o diagrama de entidades e relacionamentos utilizado no projeto:
   - `password`: Senha criptografada
   - `created_at`, `updated_at`
 
-- **Tarefas** (`tasks`)
+- **Tarefas** (`tarefas`)
   - `id`: Identificador único (PK)
   - `user_id`: Relacionamento com o usuário (FK)
   - `title`: Título da tarefa
