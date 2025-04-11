@@ -26,11 +26,10 @@ class Tarefa extends Model
         'data_vencimento' => 'datetime',
     ];
 
-    /**
-     * Relacionamento: Tarefa pertence a um usuário.
-     */
-    public function usuario()
+    private function authorizeTarefa(Tarefa $tarefa)
     {
-        return $this->belongsTo(User::class, 'user_id');
+        if (!auth()->user()->is_admin && $tarefa->user_id !== auth()->id()) {
+            abort(403, 'Você não tem permissão para esta ação.');
+        }
     }
 }
