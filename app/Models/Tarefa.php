@@ -26,6 +26,11 @@ class Tarefa extends Model
         'data_vencimento' => 'datetime',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     private function authorizeTarefa(Tarefa $tarefa)
     {
         if (!auth()->user()->is_admin && $tarefa->user_id !== auth()->id()) {
