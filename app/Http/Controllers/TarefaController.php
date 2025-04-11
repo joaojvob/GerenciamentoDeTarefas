@@ -2,117 +2,116 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TarefaRequest;
+use App\Services\TarefaService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Models\Tarefa;
+use Illuminate\View\View;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TarefaController extends Controller
 {
-    public function dataTable()
+    protected $service;
+
+    public function __construct(TarefaService $service)
+    {
+        $this->service = $service;
+    }
+
+    public function dataTable(): View
     {
         return view('dashboard');
     }
 
-    public function data(Request $request)
+    public function data(): JsonResponse
     {
-        $query = Tarefa::query();
-        
-        if (!auth()->user()->is_admin) {
-            $query->where('user_id', auth()->id());
-        }
+        $tarefas = $this->service->getTarefas();
 
-        return datatables()->of($query)
-            ->addColumn('actions', function ($tarefa) {
-                return '
-                    <button class="bg-green-500 text-white px-2 py-1 rounded item-edit" data-id="'.$tarefa->id.'">Editar</button>
-                    <button class="bg-red-500 text-white px-2 py-1 rounded item-remove" data-id="'.$tarefa->id.'">Excluir</button>
-                ';
-            })
+        return datatables()->of($tarefas)
+            ->addColumn('actions', fn ($tarefa) => view('tarefas.partials.actions', compact('tarefa'))->render())
             ->rawColumns(['actions'])
             ->make(true);
     }
 
-    public function create()
+    public function create(): View
     {
         return view('tarefas.create');
     }
 
-    public function store(Request $request)
+    public function store(TarefaRequest $request): RedirectResponse
     {
-        $request->validate([
-            'titulo'          => 'required|string|max:255',
-            'descricao'       => 'nullable|string',
-            'data_vencimento' => 'nullable|date_format:Y-m-d\TH:i',
-            'prioridade'      => 'nullable|in:baixa,media,alta',
-            'status'          => 'nullable|in:pendente,em_andamento,concluida',
-        ]);
-
-        $conflito = Tarefa::where('user_id', auth()->id())->where('data_vencimento', $request->data_vencimento)->exists();
-
-        if ($conflito) {
-            return response()->json(['error' => 'Já existe uma tarefa neste horário.'], 422);
+        try {
+            $this->service->create($request->validated());
+            return redirect()->route('dashboard')->with('success', 'Tarefa criada com sucesso!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
-
-        $tarefa = Tarefa::create([
-            'user_id'         => auth()->id(),
-            'titulo'          => $request->titulo,
-            'descricao'       => $request->descricao,
-            'data_vencimento' => $request->data_vencimento,
-            'prioridade'      => $request->prioridade ?? 'media',
-            'status'          => $request->status ?? 'pendente',
-            'ordem'           => Tarefa::where('user_id', auth()->id())->max('ordem') + 1,
-        ]);
-
-        return redirect()->route('dashboard')->with('success', 'Tarefa criada com sucesso!');
     }
 
-    public function atualiza(Request $request, Tarefa $tarefa)
+    public function edit($id): JsonResponse
     {
-        Tarefa::authorizeTarefa($tarefa);
-
-        $request->validate([
-            'titulo'          => 'required|string|max:255',
-            'descricao'       => 'nullable|string',
-            'data_vencimento' => 'nullable|date_format:Y-m-d\TH:i',
-            'prioridade'      => 'nullable|in:baixa,media,alta',
-            'status'          => 'nullable|in:pendente,em_andamento,concluida',
-        ]);
-
-        $conflito = Tarefa::where('user_id', auth()->id())
-            ->where('data_vencimento', $request->data_vencimento)
-            ->where('id', '!=', $tarefa->id)
-            ->exists();
-
-        if ($conflito) {
-            return response()->json(['error' => 'Já existe uma tarefa neste horário.'], 422);
+        $tarefa = $this->service->find($id); 
+        if (!$tarefa) {
+            return response()->json(['error' => 'Tarefa não encontrada.'], 404);
         }
-
-        $tarefa->update($request->only(['titulo', 'descricao', 'data_vencimento', 'prioridade', 'status']));
-
-        return response()->json(['success' => 'Tarefa atualizada com sucesso!']);
-    }
-
-    public function edit(Tarefa $tarefa)
-    {
-        Tarefa::authorizeTarefa($tarefa);
         return response()->json($tarefa);
     }
 
-    public function destroy(Tarefa $tarefa)
+    public function update(TarefaRequest $request, $id): JsonResponse
     {
-        Tarefa::authorizeTarefa($tarefa);
-        $tarefa->delete();
-        return response()->json(['success' => 'Tarefa excluída com sucesso!']);
-    }
-    
-    public function relatorio()
-    {
-        $total      = Tarefa::where('user_id', auth()->id())->count();
-        $concluidas = Tarefa::where('user_id', auth()->id())->where('status', 'concluida')->count();
+        $tarefa = $this->service->find($id); 
 
-        return response()->json([
-            'total_tarefas'        => $total,
-            'tarefas_concluidas'   => $concluidas,
-            'percentual_concluido' => $total > 0 ? ($concluidas / $total) * 100 : 0,
-        ]);
+        if (!$tarefa) {
+            return response()->json(['error' => 'Tarefa não encontrada.'], 404);
+        }
+
+        try {
+            $this->service->update($tarefa, $request->validated());
+            return response()->json(['success' => 'Tarefa atualizada com sucesso!']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
+    public function destroy($id): JsonResponse
+    {
+        $tarefa = $this->service->find($id); 
+
+        if (!$tarefa) {
+            return response()->json(['error' => 'Tarefa não encontrada.'], 404);
+        }
+
+        try {
+            $this->service->delete($tarefa);
+            return response()->json(['success' => 'Tarefa excluída com sucesso!']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function generatePdfReport(): \Illuminate\Http\Response
+    {
+        $tarefas = $this->service->getTarefas();
+        $isAdmin = auth()->user()->is_admin;
+
+        $data = [
+            'tarefas'              => $tarefas,
+            'is_admin'             => $isAdmin,
+            'total_tarefas'        => $tarefas->count(),
+            'tarefas_concluidas'   => $tarefas->where('status', 'Concluida')->count(),
+            'percentual_concluido' => $tarefas->count() > 0 ? ($tarefas->where('status', 'Concluida')->count() / $tarefas->count()) * 100 : 0,
+        ];
+
+        $pdf = Pdf::loadView('tarefas.pdf.report', $data);
+        return $pdf->download('relatorio_tarefas_' . now()->format('Ymd_His') . '.pdf');
+    }
+
+    public function productivityAnalysis(Request $request): JsonResponse
+    {
+        $period = $request->query('period', 'week');
+        $data   = $this->service->getProductivityAnalysis($period);
+
+        return response()->json($data);
     }
 }

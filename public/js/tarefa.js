@@ -6,12 +6,14 @@
         this.options = {
             ajax: true,
             url: {
-                base: '{{ route("tarefas.data") }}',
-                store: '{{ route("tarefas.store") }}'
+                base: window.tarefaRoutes.base,    
+                store: window.tarefaRoutes.store,
+                analise: window.tarefaRoutes.analise
             },
             datatables: {
                 tarefas: null
-            }
+            },
+            chart: null
         };
 
         this.initDataTable = function () {
@@ -19,23 +21,18 @@
 
             _this.options.datatables.tarefas = $table.DataTable({
                 processing: true,
-                serverSide: true,
+                serverSide: false,
                 ajax: {
                     url: _this.options.url.base,
                     type: 'GET',
-                    data: function(d) {
-                        d.search = '';
-                    },
-                    dataSrc: function(json) {
-                        return json.data;
-                    }
+                    dataSrc: 'data'
                 },
                 columns: [
-                    { data: 'titulo', name: 'titulo' },
-                    { data: 'descricao', name: 'descricao' },
-                    { data: 'data_vencimento', name: 'data_vencimento' },
-                    { data: 'prioridade', name: 'prioridade' },
-                    { data: 'status', name: 'status' },
+                    { data: 'titulo' },
+                    { data: 'descricao' },
+                    { data: 'data_vencimento' },
+                    { data: 'prioridade' },
+                    { data: 'status' },
                     {
                         data: null,
                         orderable: false,
@@ -47,7 +44,7 @@
                             `;
                         }
                     }
-                ],
+                ]
             });
 
             $table.on('click', '.item-edit', function () {
@@ -69,13 +66,14 @@
         this.showEditModal = function (data) {
             let $form = $('#editTarefaForm');
             let $modal = $('#editTarefaModal');
-        
+
             $form.trigger("reset");
             $form.find('[name="titulo"]').val(data.titulo);
             $form.find('[name="descricao"]').val(data.descricao);
-            $form.find('[name="data_vencimento"]').val(data.data_vencimento?.slice(0, 16));
+            $form.find('[name="data_vencimento"]').val(data.data_vencimento ? data.data_vencimento.slice(0, 16) : '');
             $form.find('[name="prioridade"]').val(data.prioridade);
             $form.find('[name="status"]').val(data.status);
+            $form.data('id', data.id);
             $modal.removeClass('hidden');
         };
 
@@ -86,26 +84,82 @@
                 success: function (data) {
                     _this.showEditModal(data);
                 },
-                error: function () {
-                    alert('Erro ao buscar os detalhes da tarefa!');
+                error: function (response) {
+                    alert(response.responseJSON?.error || 'Erro ao buscar os detalhes da tarefa!');
                 }
             });
         };
 
         this.removeTarefa = function (id) {
             if (!confirm('Tem certeza de que deseja excluir esta tarefa?')) return;
-
+        
             $.ajax({
                 url: `/tarefas/${id}`,
                 type: 'DELETE',
-                data: { _token: '{{ csrf_token() }}' },
-                success: function () {
-                    alert('Tarefa excluída com sucesso!');
+                data: { _token: window.tarefaRoutes.csrfToken },  
+                success: function (response) {
+                    alert(response.success || 'Tarefa excluída com sucesso!');
                     _this.options.datatables.tarefas.ajax.reload();
                 },
-                error: function () {
-                    alert('Erro ao excluir a tarefa!');
+                error: function (response) {
+                    alert(response.responseJSON?.error || 'Erro ao excluir a tarefa!');
                 }
+            });
+        };
+
+        this.initProductivityChart = function () {
+            var ctx = document.getElementById('productivityChart').getContext('2d');
+
+            function fetchData(period) {
+                $.ajax({
+                    url: _this.options.url.analise,
+                    type: 'GET',
+                    data: { period: period },
+                    success: function (data) {
+                        var labels = data.map(function (item) { return item.period; });
+                        var totalData = data.map(function (item) { return item.total; });
+                        var concluidasData = data.map(function (item) { return item.concluidas; });
+
+                        if (_this.options.chart) {
+                            _this.options.chart.destroy();
+                        }
+
+                        _this.options.chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: 'Tarefas Totais',
+                                        data: totalData,
+                                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                    },
+                                    {
+                                        label: 'Tarefas Concluídas',
+                                        data: concluidasData,
+                                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                                    },
+                                ],
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                    },
+                                },
+                            },
+                        });
+                    },
+                    error: function () {
+                        alert('Erro ao carregar análise de produtividade!');
+                    }
+                });
+            }
+
+            fetchData('week');
+
+            $('#periodSelect').on('change', function () {
+                fetchData($(this).val());
             });
         };
 
@@ -113,28 +167,29 @@
             $.extend(true, _this.options, opts);
 
             _this.initDataTable();
+            _this.initProductivityChart();
 
-            $('#createTarefaButton').click(function () {
+            $('#createTarefaButton').on('click', function () {
                 _this.showCreateModal();
             });
 
-            $('#cancelCreateTarefa').click(function () {
+            $('#cancelCreateTarefa').on('click', function () {
                 $('#createTarefaForm').trigger("reset");
                 $('#createTarefaModal').addClass('hidden');
             });
 
-            $('#cancelEditTarefa').click(function () {
+            $('#cancelEditTarefa').on('click', function () {
                 $('#editTarefaModal').addClass('hidden');
             });
 
-            $('#createTarefaForm').submit(function (e) {
+            $('#createTarefaForm').on('submit', function (e) {
                 e.preventDefault();
                 let data = $(this).serialize();
 
                 $.ajax({
                     url: _this.options.url.store,
                     type: 'POST',
-                    data: data,
+                    data: data, 
                     success: function () {
                         alert('Tarefa criada com sucesso!');
                         $('#createTarefaModal').addClass('hidden');
@@ -147,17 +202,18 @@
                 });
             });
 
-            $('#editTarefaForm').submit(function (e) {
+            $('#editTarefaForm').on('submit', function (e) {
                 e.preventDefault();
-                let data = $(this).serialize();
-                let id = $('#editTarefaModal').find('[data-id]').val() || $('.item-edit[data-id]').data('id');
+                let $form = $(this);
+                let data = $form.serialize();
+                let id = $form.data('id');
 
                 $.ajax({
-                    url: `/tarefas/${id}/atualiza`,
+                    url: `/tarefas/${id}/update`,
                     type: 'PATCH',
                     data: data,
-                    success: function () {
-                        alert('Tarefa atualizada com sucesso!');
+                    success: function (response) {
+                        alert(response.success || 'Tarefa atualizada com sucesso!');
                         $('#editTarefaModal').addClass('hidden');
                         _this.options.datatables.tarefas.ajax.reload();
                     },
@@ -180,5 +236,9 @@
 
         return obj;
     };
+
+    $(document).ready(function() {
+        $.tarefas();
+    });
 
 })(jQuery, window, document);

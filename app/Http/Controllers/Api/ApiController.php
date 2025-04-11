@@ -37,8 +37,8 @@ class ApiController extends Controller{
             'titulo'          => 'required|string|max:255',
             'descricao'       => 'nullable|string',
             'data_vencimento' => 'nullable|date',
-            'prioridade'      => 'nullable|in:baixa,media,alta',
-            'status'          => 'nullable|in:pendente,em_andamento,concluida',
+            'prioridade'      => 'nullable|in:Baixa,Média,Alta',
+            'status'          => 'nullable|in:Pendente,Em Andamento,Concluida',
         ]);
 
         $tarefa = Tarefa::create([
@@ -46,8 +46,8 @@ class ApiController extends Controller{
             'titulo'          => $request->titulo,
             'descricao'       => $request->descricao,
             'data_vencimento' => $request->data_vencimento,
-            'prioridade'      => $request->prioridade ?? 'media',
-            'status'          => $request->status ?? 'pendente',
+            'prioridade'      => $request->prioridade ?? 'Média',
+            'status'          => $request->status ?? 'Pendente',
         ]);
 
         return response()->json($tarefa, 201);
@@ -61,8 +61,8 @@ class ApiController extends Controller{
             'titulo'          => 'required|string|max:255',
             'descricao'       => 'nullable|string',
             'data_vencimento' => 'nullable|date',
-            'prioridade'      => 'nullable|in:baixa,media,alta',
-            'status'          => 'nullable|in:pendente,em_andamento,concluida',
+            'prioridade'      => 'nullable|in:Baixa,Média,Alta',
+            'status'          => 'nullable|in:Pendente,Em Andamento,Concluida',
         ]);
 
         $tarefa->update($request->only(['titulo', 'descricao', 'data_vencimento', 'prioridade', 'status']));

@@ -1,0 +1,2 @@
+<button class="bg-green-500 text-white px-2 py-1 rounded item-edit" data-id="{{ $tarefa->id }}">Editar</button>
+<button class="bg-red-500 text-white px-2 py-1 rounded item-remove" data-id="{{ $tarefa->id }}">Excluir</button>

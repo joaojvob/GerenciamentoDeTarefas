@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Suas tarefas') }}
+            {{ __('Suas Tarefas') }}
         </h2>
     </x-slot>
 
@@ -9,9 +9,26 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <button class="bg-blue-500 text-white py-2 px-4 rounded mb-4" id="createTarefaButton">
-                        Criar Tarefa
-                    </button>
+                    <div class="flex justify-between mb-4">
+                        <button class="bg-blue-500 text-white py-2 px-4 rounded" id="createTarefaButton">
+                            Criar Tarefa
+                        </button>
+                        <a href="{{ route('tarefas.relatorio.pdf') }}" class="bg-green-500 text-white py-2 px-4 rounded">
+                            Exportar Relatório PDF
+                        </a>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold">Análise de Produtividade</h3>
+                        <div class="mb-4">
+                            <label for="periodSelect">Período:</label>
+                            <select id="periodSelect" class="border rounded p-1">
+                                <option value="week">Semanal</option>
+                                <option value="month">Mensal</option>
+                            </select>
+                        </div>
+                        <canvas id="productivityChart" height="100"></canvas>
+                    </div>
 
                     <table id="tarefasTable" class="table-auto w-full">
                         <thead>
@@ -24,32 +41,28 @@
                                 <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody>
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal -->
-    @include('tarefas.create', ['ajax' => true])
-    @include('tarefas.edit', ['ajax' => true])
+    @include('tarefas.create')
+    @include('tarefas.edit')
 
-    <!-- Scripts Essenciais -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="{{ asset('/js/tarefa.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        $(document).ready(function() {
-            $.tarefas({
-                url: {
-                    base: '{{ route("tarefas.data") }}',
-                    store: '{{ route("tarefas.store") }}'
-                }
-            });
-        });
+        window.tarefaRoutes = {
+            base: '{{ route("tarefas.data") }}',
+            store: '{{ route("tarefas.store") }}',
+            analise: '{{ route("tarefas.analise") }}',
+            csrfToken: '{{ csrf_token() }}'
+        };
     </script>
+    <script src="{{ asset('js/tarefa.js') }}"></script>
 </x-app-layout>
