@@ -106,8 +106,8 @@ class ApiController extends Controller
             'titulo'          => 'required|string|max:255',
             'descricao'       => 'nullable|string',
             'data_vencimento' => 'nullable|date',
-            'prioridade'      => 'nullable|in:baixa,media,alta',
-            'status'          => 'nullable|in:pendente,em_andamento,concluida',
+            'prioridade'      => 'nullable|in:Baixa,Media,Alta',
+            'status'          => 'nullable|in:Pendente,Em Andamento,Concluida,Cancelada',
             'ordem'           => 'nullable|integer',
         ]);
 
@@ -116,8 +116,8 @@ class ApiController extends Controller
             'titulo'          => $request->titulo,
             'descricao'       => $request->descricao,
             'data_vencimento' => $request->data_vencimento,
-            'prioridade'      => $request->prioridade ?? 'media',
-            'status'          => $request->status ?? 'pendente',
+            'prioridade'      => $request->prioridade ?? 'Media',
+            'status'          => $request->status ?? 'Pendente',
             'ordem'           => $request->ordem ?? Tarefa::where('user_id', auth()->id())->max('ordem') + 1,
         ]);
 
@@ -132,8 +132,8 @@ class ApiController extends Controller
             'titulo'          => 'required|string|max:255',
             'descricao'       => 'nullable|string',
             'data_vencimento' => 'nullable|date',
-            'prioridade'      => 'nullable|in:baixa,media,alta',
-            'status'          => 'nullable|in:pendente,em_andamento,concluida',
+            'prioridade'      => 'nullable|in:Baixa,Media,Alta',
+            'status'          => 'nullable|in:Pendente,Em Andamento,Concluida,Cancelada',
             'ordem'           => 'nullable|integer',
         ]);
 

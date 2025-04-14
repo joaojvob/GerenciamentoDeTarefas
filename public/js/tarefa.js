@@ -37,7 +37,7 @@
 
         this.initDataTable = function () {
             var $table = $('#tarefasTable');
-
+        
             _this.options.datatables.tarefas = $table.DataTable({
                 processing: true,
                 serverSide: false,
@@ -48,7 +48,12 @@
                 },
                 columns: [
                     { data: 'ordem' },
-                    { data: 'titulo' },
+                    {
+                        data: 'titulo',
+                        render: function (data, type, row) {
+                            return `<span data-fulltext="${data}">${data}</span>`;
+                        }
+                    },
                     {
                         data: 'data_vencimento_formatada',
                         render: function (data) {
@@ -56,7 +61,12 @@
                         }
                     },
                     { data: 'prioridade' },
-                    { data: 'status' },
+                    {
+                        data: 'status',
+                        render: function (data, type, row) {
+                            return `<span data-fulltext="${data}">${data}</span>`;
+                        }
+                    },
                     {
                         data: null,
                         orderable: false,
@@ -286,6 +296,65 @@
             window.location.href = url;
         };
 
+        this.fetchProductivityData = function (period) {
+            $.ajax({
+                url: _this.options.url.analise,
+                type: 'GET',
+                data: { period: period },
+                success: function (data) {
+                    var labels = data.map(function (item) { return item.period; });
+                    var totalData = data.map(function (item) { return item.total; });
+                    var concluidasData = data.map(function (item) { return item.concluidas; });
+
+                    if (_this.options.chart) {
+                        _this.options.chart.destroy();
+                    }
+
+                    var ctx = document.getElementById('productivityChart').getContext('2d');
+                    _this.options.chart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Tarefas Totais',
+                                    data: totalData,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                },
+                                {
+                                    label: 'Tarefas Concluídas',
+                                    data: concluidasData,
+                                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                                },
+                            ],
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                },
+                            },
+                        },
+                    });
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro!',
+                        text: 'Erro ao carregar análise de produtividade!'
+                    });
+                }
+            });
+        };
+
+        this.initProductivityChart = function () {
+            _this.fetchProductivityData('week');
+
+            $('#periodSelect').on('change', function () {
+                _this.fetchProductivityData($(this).val());
+            });
+        };
+
         this.run = function (opts) {
             $.extend(true, _this.options, opts);
 
@@ -294,7 +363,12 @@
 
             setInterval(function () {
                 _this.options.datatables.tarefas.ajax.reload(null, false);
-            }, 10 * 1000);
+            }, 2 * 1000);
+
+            setInterval(function () {
+                var period = $('#periodSelect').val() || 'week';
+                _this.fetchProductivityData(period);
+            }, 2 * 1000);
 
             $('#createTarefaButton').on('click', function () {
                 _this.showCreateModal();

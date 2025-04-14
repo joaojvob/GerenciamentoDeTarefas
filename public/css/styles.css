@@ -167,3 +167,44 @@ select {
 .dark #showDescricao::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
 }
+
+#tarefasTable td {
+    max-width: 200px;  
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#tarefasTable td:nth-child(2) { 
+    max-width: 300px;
+}
+
+#tarefasTable td:nth-child(5) {  
+    max-width: 150px;
+}
+
+#tarefasTable td {
+    position: relative;
+    cursor: pointer;
+}
+
+#tarefasTable td:hover::after {
+    content: attr(data-fulltext);
+    position: absolute;
+    background: #333;
+    color: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    z-index: 10;
+    white-space: normal;
+    max-width: 300px;
+    word-wrap: break-word;
+    top: 100%;
+    left: 0;
+    display: block;
+}
+
+.dark #tarefasTable td:hover::after {
+    background: #4b5563;
+    color: #e5e7eb;
+}
