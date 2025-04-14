@@ -61,3 +61,16 @@ button:disabled {
     cursor: not-allowed;
     box-shadow: none;
 }
+
+#showTarefaModal {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+#showTarefaModal.opacity-100 {
+    opacity: 1;
+}
+
+#showTarefaModal .max-w-sm {
+    max-width: 320px; 
+}

@@ -13,9 +13,14 @@
                         <button class="bg-blue-500 text-white py-2 px-4 rounded" id="createTarefaButton">
                             Criar Tarefa
                         </button>
-                        <a href="{{ route('tarefas.relatorio.pdf') }}" class="bg-green-500 text-white py-2 px-4 rounded">
-                            Exportar Relatório PDF
-                        </a>
+                        <div>
+                            <button class="bg-gray-500 text-white py-2 px-4 rounded mr-2" id="reloadTarefas">
+                                Atualizar
+                            </button>
+                            <a href="{{ route('tarefas.relatorio.pdf') }}" class="bg-green-500 text-white py-2 px-4 rounded">
+                                Exportar Relatório PDF
+                            </a>
+                        </div>
                     </div>
 
                     <div class="mb-8">
@@ -34,7 +39,6 @@
                         <thead>
                             <tr>
                                 <th>Título</th>
-                                <th>Descrição</th>
                                 <th>Data de Vencimento</th>
                                 <th>Prioridade</th>
                                 <th>Status</th>
@@ -48,13 +52,16 @@
         </div>
     </div>
 
-    @include('tarefas.create')
-    @include('tarefas.edit')
+    @include('tarefas.show')
+    @include('tarefas.form')
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <script>
         window.tarefaRoutes = {

@@ -3,6 +3,9 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use App\Jobs\EnviarLembreteTarefa;
+use App\Models\Tarefa;
+use Illuminate\Console\Scheduling\Schedule;
 
 class Kernel extends HttpKernel
 {
@@ -52,4 +55,26 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];
+
+    protected function schedule(Schedule $schedule)
+    {
+        $schedule->call(function () {
+            $tarefas = Tarefa::whereNotNull('data_vencimento')
+                ->whereIn('status', ['pendente', 'em_andamento'])
+                ->where('data_vencimento', '<=', now()->addHour())
+                ->where('data_vencimento', '>=', now())
+                ->get();
+
+            foreach ($tarefas as $tarefa) {
+                EnviarLembreteTarefa::dispatch($tarefa);
+            }
+        })->everyMinute();  
+    }
+
+    protected function commands()
+    {
+        $this->load(__DIR__.'/Commands');
+        
+        require base_path('routes/console.php');
+    }
 }

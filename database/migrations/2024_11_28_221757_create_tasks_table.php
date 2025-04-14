@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('titulo');
             $table->text('descricao')->nullable();
             $table->enum('prioridade', ['Baixa', 'Média', 'Alta'])->default('Média');
-            $table->enum('status', ['Pendente', 'Em Andamento', 'Concluida', 'cancelada'])->default('Pendente');
+            $table->enum('status', ['Pendente', 'Em Andamento', 'Concluida', 'Cancelada'])->default('Pendente');
             $table->dateTime('data_vencimento')->nullable();
             $table->integer('ordem')->default(0);
             $table->foreignId('user_id')->constrained()->onDelete('cascade');

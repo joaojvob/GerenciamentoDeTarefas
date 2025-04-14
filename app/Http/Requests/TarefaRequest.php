@@ -18,7 +18,7 @@ class TarefaRequest extends FormRequest
             'descricao'       => 'nullable|string',
             'data_vencimento' => 'nullable|date_format:Y-m-d\TH:i',
             'prioridade'      => 'nullable|in:Baixa,Média,Alta',
-            'status'          => 'nullable|in:Pendente,Em Andamento,Concluida',
+            'status'          => 'nullable|in:Pendente,Em Andamento,Concluida,Cancelada',
         ];
     }
 

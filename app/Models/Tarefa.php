@@ -37,4 +37,9 @@ class Tarefa extends Model
             abort(403, 'Você não tem permissão para esta ação.');
         }
     }
+
+    public function getDataVencimentoFormatadaAttribute()
+    {
+        return $this->data_vencimento ? $this->data_vencimento->format('d/m/Y H:i') : null;
+    }
 }

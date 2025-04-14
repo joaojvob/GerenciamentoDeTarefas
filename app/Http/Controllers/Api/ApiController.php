@@ -20,11 +20,14 @@ class ApiController extends Controller
         if (auth()->attempt($credentials)) {
             $user  = auth()->user();
             $token = $user->createToken('auth_token')->plainTextToken;
-
-            return response()->json(['token' => $token, 'user' => $user]);
+            
+            return response()->json([
+                'token'   => $token,
+                'user'    => $user,
+                'message' => 'Login realizado com sucesso!'
+            ], 200);
         }
-
-        return response()->json(['error' => 'Credenciais inválidas'], 401);
+        return response()->json(['message' => 'Credenciais inválidas. Verifique seu email ou senha.'], 401);
     }
 
     public function register(Request $request)
@@ -43,37 +46,55 @@ class ApiController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json(['token' => $token, 'user' => $user], 201);
+        return response()->json([
+            'token'   => $token,
+            'user'    => $user,
+            'message' => 'Usuário registrado com sucesso! Bem-vindo(a).'
+        ], 201);
     }
 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logout realizado com sucesso']);
+        return response()->json(['message' => 'Logout realizado com sucesso. Até logo!']);
     }
 
     public function updatePassword(Request $request)
     {
         $request->validate([
-            'current_password'=> 'required|string',
-            'password'        => 'required|string|min:8|confirmed',
+            'current_password' => 'required|string',
+            'password'         => 'required|string|min:8|confirmed',
         ]);
 
         $user = auth()->user();
 
         if (!Hash::check($request->current_password, $user->password)) {
-            return response()->json(['error' => 'Senha atual incorreta'], 422);
+            return response()->json(['message' => 'A senha atual está incorreta.'], 422);
         }
 
         $user->update(['password' => Hash::make($request->password)]);
 
-        return response()->json(['message' => 'Senha atualizada com sucesso']);
+        return response()->json(['message' => 'Senha atualizada com sucesso!']);
     }
 
     public function apiIndex(Request $request)
     {
         $tarefas = Tarefa::where('user_id', auth()->id())->orderBy('ordem')->get();
-        return response()->json($tarefas);
+        
+        return response()->json([
+            'data'    => $tarefas,
+            'message' => 'Tarefas carregadas com sucesso.'
+        ], 200);
+    }
+
+    public function apiShow(Tarefa $tarefa)
+    {
+        $this->authorizeTarefa($tarefa);
+
+        return response()->json([
+            'data'    => $tarefa,
+            'message' => 'Tarefa encontrada com sucesso.'
+        ], 200);
     }
 
     public function apiStore(Request $request)
@@ -105,23 +126,28 @@ class ApiController extends Controller
         $this->authorizeTarefa($tarefa);
 
         $request->validate([
-            'titulo' => 'required|string|max:255',
-            'descricao' => 'nullable|string',
+            'titulo'          => 'required|string|max:255',
+            'descricao'       => 'nullable|string',
             'data_vencimento' => 'nullable|date',
-            'prioridade' => 'nullable|in:baixa,media,alta',
-            'status' => 'nullable|in:pendente,em_andamento,concluida',
-            'ordem' => 'nullable|integer',
+            'prioridade'      => 'nullable|in:baixa,media,alta',
+            'status'          => 'nullable|in:pendente,em_andamento,concluida',
+            'ordem'           => 'nullable|integer',
         ]);
 
         $tarefa->update($request->only(['titulo', 'descricao', 'data_vencimento', 'prioridade', 'status', 'ordem']));
-        return response()->json($tarefa);
+
+        return response()->json([
+            'data'    => $tarefa,
+            'message' => 'Tarefa atualizada com sucesso!'
+        ], 200);
     }
 
     public function apiDestroy(Tarefa $tarefa)
     {
         $this->authorizeTarefa($tarefa);
         $tarefa->delete();
-        return response()->json(['message' => 'Tarefa excluída com sucesso']);
+
+        return response()->json(['message' => 'Tarefa excluída com sucesso!'], 200);
     }
 
     protected function authorizeTarefa(Tarefa $tarefa)

@@ -19,6 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/tarefas/relatorio/pdf', [TarefaController::class, 'generatePdfReport'])->name('tarefas.relatorio.pdf');
     Route::get('/tarefas/analise-produtividade', [TarefaController::class, 'productivityAnalysis'])->name('tarefas.analise');
     Route::patch('/tarefas/{id}/update', [TarefaController::class, 'update'])->name('tarefas.update');
+    Route::get('/tarefas/{id}', [TarefaController::class, 'show'])->name('tarefas.show');
 
     Route::get('/tarefas/create', [TarefaController::class, 'create'])->name('tarefas.create');
     Route::post('/tarefas', [TarefaController::class, 'store'])->name('tarefas.store');

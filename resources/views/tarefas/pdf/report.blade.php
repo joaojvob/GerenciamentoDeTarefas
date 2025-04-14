@@ -8,7 +8,8 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
-        .summary { margin-top: 20px; }
+        h1 { text-align: center; }
+        .summary { margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -38,13 +39,13 @@
         <tbody>
             @foreach($tarefas as $tarefa)
                 <tr>
-                    <td>{{ $tarefa->titulo }}</td>
-                    <td>{{ $tarefa->descricao ?? '-' }}</td>
-                    <td>{{ $tarefa->data_vencimento ? \Carbon\Carbon::parse($tarefa->data_vencimento)->format('d/m/Y H:i') : '-' }}</td>
-                    <td>{{ ucfirst($tarefa->prioridade) }}</td>
-                    <td>{{ ucfirst($tarefa->status) }}</td>
+                    <td>{{ $tarefa->titulo ?? 'Sem título' }}</td>
+                    <td>{{ $tarefa->descricao ?? 'Sem descrição' }}</td>
+                    <td>{{ $tarefa->data_vencimento_formatada }}</td>
+                    <td>{{ $tarefa->prioridade ?? 'Não definido' }}</td>
+                    <td>{{ $tarefa->status ?? 'Não definido' }}</td>
                     @if($is_admin)
-                        <td>{{ $tarefa->user->name ?? 'N/A' }}</td>
+                        <td>{{ $tarefa->user->name ?? 'Desconhecido' }}</td>
                     @endif
                 </tr>
             @endforeach
