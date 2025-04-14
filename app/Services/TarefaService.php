@@ -23,30 +23,32 @@ class TarefaService
 
     public function find($id): ?Tarefa
     {
-        $tarefa = $this->repository->find($id);
-        if ($tarefa) {
-            $this->authorize($tarefa); // Verifica autorização
-        }
-        return $tarefa;
+        return $this->repository->find($id);
     }
 
     public function create(array $data): Tarefa
     {
+        if (!$this->canCreate()) {
+            throw new \Exception('Você não tem permissão para criar tarefas.');
+        }
+
         if ($this->repository->existsByDateAndUser(Auth::id(), $data['data_vencimento'] ?? null)) {
             throw new \Exception('Já existe uma tarefa neste horário.');
         }
 
-        $data['user_id'] = Auth::id();
+        $data['user_id']    = Auth::id();
         $data['prioridade'] = $data['prioridade'] ?? 'media';
-        $data['status'] = $data['status'] ?? 'pendente';
-        $data['ordem'] = Tarefa::where('user_id', Auth::id())->max('ordem') + 1;
+        $data['status']     = $data['status'] ?? 'pendente';
+        $data['ordem']      = Tarefa::where('user_id', Auth::id())->max('ordem') + 1;
 
         return $this->repository->create($data);
     }
 
     public function update(Tarefa $tarefa, array $data): bool
     {
-        $this->authorize($tarefa);
+        if (!$this->canEdit($tarefa)) {
+            throw new \Exception('Você não tem permissão para editar esta tarefa.');
+        }
 
         if ($this->repository->existsByDateAndUser(Auth::id(), $data['data_vencimento'] ?? null, $tarefa->id)) {
             throw new \Exception('Já existe uma tarefa neste horário.');
@@ -57,7 +59,9 @@ class TarefaService
 
     public function delete(Tarefa $tarefa): bool
     {
-        $this->authorize($tarefa);
+        if (!$this->canDelete($tarefa)) {
+            throw new \Exception('Você não tem permissão para excluir esta tarefa.');
+        }
         return $this->repository->delete($tarefa);
     }
 
@@ -96,10 +100,23 @@ class TarefaService
         })->toArray();
     }
 
-    protected function authorize(Tarefa $tarefa): void
+    public function canCreate(): bool
     {
-        if ($tarefa->user_id !== Auth::id() && !Auth::user()->is_admin) {
-            throw new \Exception('Ação não autorizada.');
-        }
+        return Auth::check();
+    }
+
+    public function canView(Tarefa $tarefa): bool
+    {
+        return Auth::user()->is_admin || $tarefa->user_id === Auth::id();
+    }
+
+    public function canEdit(Tarefa $tarefa): bool
+    {
+        return Auth::user()->is_admin || $tarefa->user_id === Auth::id();
+    }
+
+    public function canDelete(Tarefa $tarefa): bool
+    {
+        return Auth::user()->is_admin || $tarefa->user_id === Auth::id();
     }
 }

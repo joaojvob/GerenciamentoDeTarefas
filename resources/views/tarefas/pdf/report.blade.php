@@ -3,13 +3,47 @@
 <head>
     <title>Relatório de Tarefas</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        h1 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        h1 { text-align: center; }
-        .summary { margin-bottom: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            font-size: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .description {
+            max-width: 300px;  
+            word-wrap: break-word;  
+            overflow-wrap: break-word; 
+            white-space: normal; 
+        }
+        .summary {
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        p {
+            margin: 5px 0;
+        }
+        tr {
+            page-break-inside: avoid;
+        }
     </style>
 </head>
 <body>
@@ -40,7 +74,7 @@
             @foreach($tarefas as $tarefa)
                 <tr>
                     <td>{{ $tarefa->titulo ?? 'Sem título' }}</td>
-                    <td>{{ $tarefa->descricao ?? 'Sem descrição' }}</td>
+                    <td class="description">{{ $tarefa->descricao ?? 'Sem descrição' }}</td>
                     <td>{{ $tarefa->data_vencimento_formatada }}</td>
                     <td>{{ $tarefa->prioridade ?? 'Não definido' }}</td>
                     <td>{{ $tarefa->status ?? 'Não definido' }}</td>

@@ -6,9 +6,10 @@
         this.options = {
             ajax: true,
             url: {
-                base: window.tarefaRoutes.base,    
+                base: window.tarefaRoutes.base,
                 store: window.tarefaRoutes.store,
-                analise: window.tarefaRoutes.analise
+                analise: window.tarefaRoutes.analise,
+                relatorio: window.tarefaRoutes.relatorio
             },
             datatables: {
                 tarefas: null
@@ -19,33 +20,24 @@
         this.makeFieldSelect2Simple = function (el, data, multiple) {
             data = data || [];
             multiple = multiple || false;
-        
+
             var options = {
                 allowClear: true,
                 placeholder: "Selecione",
                 minimumResultsForSearch: data.length < 50 ? -1 : 0,
                 data: data
             };
-        
+
             if (multiple) {
                 options['multiple'] = true;
             }
-        
-            return el.select2(options);
-        };    
 
-        this.getStatusSelect2 = function () {
-            return _documento.arr2Select2([
-                'Pendente',
-                'Em Andamento',
-                'Concluida',
-                'Cancelada',
-            ]);
+            return el.select2(options);
         };
 
         this.initDataTable = function () {
             var $table = $('#tarefasTable');
-        
+
             _this.options.datatables.tarefas = $table.DataTable({
                 processing: true,
                 serverSide: false,
@@ -55,8 +47,9 @@
                     dataSrc: 'data'
                 },
                 columns: [
+                    { data: 'ordem' },
                     { data: 'titulo' },
-                    { 
+                    {
                         data: 'data_vencimento_formatada',
                         render: function (data) {
                             return data || 'Não definido';
@@ -78,17 +71,17 @@
                     }
                 ]
             });
-        
+
             $table.on('click', '.item-show', function () {
                 var id = $(this).data('id');
                 _this.showTarefa(id);
             });
-        
+
             $table.on('click', '.item-edit', function () {
                 var id = $(this).data('id');
                 _this.editTarefa(id);
             });
-        
+
             $table.on('click', '.item-remove', function () {
                 var id = $(this).data('id');
                 _this.removeTarefa(id);
@@ -171,6 +164,7 @@
                         });
                         return;
                     }
+
                     $('#showTitulo').text(data.titulo || 'Sem título');
                     $('#showDescricao').text(data.descricao || 'Sem descrição');
                     $('#showDataVencimento').text(data.data_vencimento_formatada || 'Não definido');
@@ -194,46 +188,37 @@
             let $title = $('#tarefaModalTitle');
             let $method = $form.find('[name="_method"]');
             let $submit = $('#submitTarefa');
-        
-            // Resetar formulário
+
             $form.trigger("reset");
             $method.val(isEdit ? 'PATCH' : 'POST');
             $title.text(isEdit ? 'Editar Tarefa' : 'Adicionar Tarefa');
             $submit.text(isEdit ? 'Salvar Tarefa' : 'Salvar');
-        
-            // Preencher dados se for edição
+
             if (isEdit && data) {
                 $form.find('[name="titulo"]').val(data.titulo);
                 $form.find('[name="descricao"]').val(data.descricao);
-                $form.find('[name="data_vencimento"]').val(data.data_vencimento ? 
+                $form.find('[name="data_vencimento"]').val(data.data_vencimento ?
                     new Date(data.data_vencimento).toISOString().slice(0, 16) : '');
                 $form.find('[name="prioridade"]').val(data.prioridade);
                 $form.find('[name="status"]').val(data.status);
                 $form.data('id', data.id);
             }
-        
-            // Inicializar Select2 para prioridade
+
             _this.makeFieldSelect2Simple($form.find('select[name="prioridade"]'), [
                 { id: 'Baixa', text: 'Baixa' },
                 { id: 'Média', text: 'Média' },
                 { id: 'Alta', text: 'Alta' }
             ]);
-        
-            // Inicializar Select2 para status
+
             _this.makeFieldSelect2Simple($form.find('select[name="status"]'), [
                 { id: 'Pendente', text: 'Pendente' },
                 { id: 'Em Andamento', text: 'Em Andamento' },
                 { id: 'Concluida', text: 'Concluída' },
                 { id: 'Cancelada', text: 'Cancelada' }
             ]);
-        
-            // Mostrar modal
+
             $modal.removeClass('hidden');
         };
-        
-        $('#cancelShowTarefa').on('click', function () {
-            $('#showTarefaModal').addClass('hidden').removeClass('opacity-100');
-        });
 
         this.initProductivityChart = function () {
             var ctx = document.getElementById('productivityChart').getContext('2d');
@@ -279,7 +264,11 @@
                         });
                     },
                     error: function () {
-                        alert('Erro ao carregar análise de produtividade!');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro!',
+                            text: 'Erro ao carregar análise de produtividade!'
+                        });
                     }
                 });
             }
@@ -291,29 +280,43 @@
             });
         };
 
+        this.exportReport = function () {
+            var format = $('#reportFormat').val();
+            var url = _this.options.url.relatorio.replace(':format', format);
+            window.location.href = url;
+        };
+
         this.run = function (opts) {
             $.extend(true, _this.options, opts);
-        
+
             _this.initDataTable();
             _this.initProductivityChart();
-        
+
             setInterval(function () {
-                _this.options.datatables.tarefas.ajax.reload(null, false);  
-            }, 10 * 1000);  
-        
+                _this.options.datatables.tarefas.ajax.reload(null, false);
+            }, 10 * 1000);
+
             $('#createTarefaButton').on('click', function () {
                 _this.showCreateModal();
             });
-        
+
             $('#cancelTarefa').on('click', function () {
                 $('#tarefaForm').trigger("reset");
                 $('#tarefaModal').addClass('hidden');
             });
 
+            $('#cancelShowTarefa').on('click', function () {
+                $('#showTarefaModal').addClass('hidden').removeClass('opacity-100');
+            });
+
             $('#reloadTarefas').on('click', function () {
                 _this.options.datatables.tarefas.ajax.reload(null, false);
             });
-        
+
+            $('#exportReport').on('click', function () {
+                _this.exportReport();
+            });
+
             $('#tarefaForm').on('submit', function (e) {
                 e.preventDefault();
                 var $form = $(this);
@@ -321,7 +324,7 @@
                 var isEdit = $form.find('[name="_method"]').val() === 'PATCH';
                 var url = isEdit ? `/tarefas/${$form.data('id')}/update` : _this.options.url.store;
                 var method = isEdit ? 'PATCH' : 'POST';
-        
+
                 $.ajax({
                     url: url,
                     type: method,
@@ -335,7 +338,7 @@
                             showConfirmButton: false
                         });
                         $('#tarefaModal').addClass('hidden');
-                        _this.options.datatables.tarefas.ajax.reload(null, false); // Recarregar DataTable após criar/editar
+                        _this.options.datatables.tarefas.ajax.reload(null, false);
                         $form[0].reset();
                     },
                     error: function (response) {
@@ -362,7 +365,7 @@
         return obj;
     };
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         $.tarefas();
     });
 

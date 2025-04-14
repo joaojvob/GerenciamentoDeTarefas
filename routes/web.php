@@ -16,7 +16,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/tarefas/data', [TarefaController::class, 'data'])->name('tarefas.data');
-    Route::get('/tarefas/relatorio/pdf', [TarefaController::class, 'generatePdfReport'])->name('tarefas.relatorio.pdf');
+    Route::get('/tarefas/relatorio/{format?}', [App\Http\Controllers\TarefaController::class, 'generateReport'])->name('tarefas.relatorio');
     Route::get('/tarefas/analise-produtividade', [TarefaController::class, 'productivityAnalysis'])->name('tarefas.analise');
     Route::patch('/tarefas/{id}/update', [TarefaController::class, 'update'])->name('tarefas.update');
     Route::get('/tarefas/{id}', [TarefaController::class, 'show'])->name('tarefas.show');

@@ -150,7 +150,6 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
-        // ...
     ],
     'aliases' => [
         'DataTables' => Yajra\DataTables\Facades\DataTables::class,

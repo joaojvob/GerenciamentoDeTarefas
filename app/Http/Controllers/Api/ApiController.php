@@ -27,6 +27,7 @@ class ApiController extends Controller
                 'message' => 'Login realizado com sucesso!'
             ], 200);
         }
+
         return response()->json(['message' => 'Credenciais inválidas. Verifique seu email ou senha.'], 401);
     }
 
@@ -56,6 +57,7 @@ class ApiController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
+
         return response()->json(['message' => 'Logout realizado com sucesso. Até logo!']);
     }
 
@@ -69,6 +71,7 @@ class ApiController extends Controller
         $user = auth()->user();
 
         if (!Hash::check($request->current_password, $user->password)) {
+            
             return response()->json(['message' => 'A senha atual está incorreta.'], 422);
         }
 
